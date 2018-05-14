@@ -20,6 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from recommendation_engine.data_store import data_store_wrapper
 """
 import os
+import logging
+
+import daiquiri
+from scipy import sparse
+
+daiquiri.setup(level=logging.WARNING)
+_logger = daiquiri.getLogger(__name__)
 
 
 def load_rating(path, data_store):
@@ -50,3 +57,16 @@ def save_temporary_local_file(buf, local_filename):
     """
     with open(os.path.join('/tmp', local_filename), 'wb') as local_fileobj:
         local_fileobj.write(buf)
+
+
+def load_scipy_sparse_matrix_from_file(matrix_filename):
+    """Load a scipy sparse matrix from file.
+
+    :matrix_filename: The local filename from which to load the matrix.
+    :returns: scipy.sparse.csr_matrix if no errors, else None.
+    """
+    try:
+        return sparse.load_npz(matrix_filename)
+    except Exception as e:
+        _logger.error("Cannot load matrix, error: {}".format(e))
+        return None
