@@ -75,7 +75,6 @@ def generation_network(inputs, decoder_units, n_x):
             )
     # TODO: Generalize this bit to figure out how to auto add more layers
     # Assign the transpose of weights to the respective layers
-    print(tf.trainable_variables())
     tf.assign(tf.get_variable("generation_network/gen_layer_1/weights"),
               tf.transpose(tf.get_variable("inference_network/inf_layer_1/weights")))
     tf.assign(tf.get_variable("generation_network/gen_layer_1/biases"),
@@ -118,4 +117,32 @@ def cvae_autoencoder_net(inputs, hidden_units, activation=tf.nn.sigmoid,
                                                       n_outputs=output_dim)
             n_features = inputs.shape[1].value
             net = generation_network(latent_representation, hidden_units[::-1], n_features)
+    return net
+
+
+def sdae_autoencoder_net(inputs, hidden_units, activation=tf.nn.sigmoid,
+                         output_dim=training_params.num_latent,
+                         mode=tf.estimator.ModeKeys.TRAIN, scope=None):
+    """Create the SDAE network required to pretrain the layers.
+
+    :inputs: tf.Tensor holding the input data.
+    :hidden_units: list[int] - containing number of nodes in each hidden layer.
+    :mode: tf.estimator.ModeKeys - The mode of the model.
+    :scope: str - Name to use in Tensor board.
+
+    :returns: tf.Tensor - Output of the generation network's reconstruction layer.
+    """
+    is_training = mode == tf.estimator.ModeKeys.TRAIN
+
+    if not is_training:
+        # TODO: Go to evaluation/scoring based on this parameters' value
+        pass
+    inputs = tf.Print(inputs, [inputs], first_n=1)
+    with tf.variable_scope(scope, 'AutoEnc', [inputs], reuse=tf.AUTO_REUSE):
+        with slim.arg_scope(_autoencoder_arg_scope(activation)):
+            latent_representation = inference_network(inputs, hidden_units,
+                                                      n_outputs=output_dim)
+            n_features = inputs.shape[1].value
+            net = generation_network(latent_representation, hidden_units[::-1], n_features)
+
     return net

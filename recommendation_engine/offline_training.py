@@ -31,7 +31,7 @@ from recommendation_engine.data_pipeline.package_representation_data import \
 from recommendation_engine.data_store.s3_data_store import S3DataStore
 import recommendation_engine.config.cloud_constants as cloud_constants
 from recommendation_engine.config.params_training import training_params
-
+from recommendation_engine.model.stacked_denoising_autoencoder import StackedDenoisingAutoEncoder
 
 class TrainingJob:
     """Define the training job for the CVAE model."""
@@ -42,6 +42,11 @@ class TrainingJob:
             hidden_units=[200, 100],
             output_dim=50,
             model_dir=path_constants.CVAE_MODEL_PATH)
+        self.pretrain_estimator = StackedDenoisingAutoEncoder(
+            hidden_units=[200, 100],
+            output_dim=50,
+            model_dir=path_constants.SDAE_MODEL_PATH)
+
         self.s3 = S3DataStore(src_bucket_name=cloud_constants.S3_BUCKET_NAME,
                               access_key=cloud_constants.AWS_S3_ACCESS_KEY_ID,
                               secret_key=cloud_constants.AWS_S3_SECRET_KEY_ID)
