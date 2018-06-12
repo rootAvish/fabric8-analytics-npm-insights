@@ -19,8 +19,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import tensorflow as tf
+import tensorflow.contrib.training as training
 
-training_params = tf.contrib.training.HParams(
+
+training_params = training.HParams(
     num_latent=50,
     weight_decay=1e-05,
     learning_rate=0.001,
